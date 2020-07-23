@@ -13,6 +13,10 @@ menu:
 
 This page describes the steps to orchestrate and execute RPA bots from Camunda BPM using the Camunda BPM RPA Bridge.
 
+{{< enterprise >}}
+  Please note that the RPA bridge is only available as enterprise edition.
+{{< /enterprise >}}
+
 # Requirements
 
 ## Java
