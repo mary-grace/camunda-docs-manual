@@ -71,7 +71,9 @@ The bridge is configurable through the `application.yml` file that is included i
   </tr>
 </table>
 
-## Configure Access to the UIPath Orchestrator API
+## Configure Access to UIPath Orchestrator
+
+## API
 
 <table class="table desc-table">
   <tr>
@@ -85,11 +87,6 @@ The bridge is configurable through the `application.yml` file that is included i
       <td><code>topics</code></td>
       <td>The topics on which the bridge will listen for RPA tasks.</td>
       <td>uipath, RPA</td>
-  </tr>
-  <tr>
-      <td><code>auth-url</code></td>
-      <td>The URL used for authentication against the UIPath API.</td>
-      <td>https://account.uipath.com/oauth/token/</td>
   </tr>
   <tr>
       <td><code>url</code></td>
@@ -106,6 +103,17 @@ The bridge is configurable through the `application.yml` file that is included i
       <td>The name of the UIPath tenant. This is only used for authentication.</td>
       <td>-</td>
   </tr>
+</table>
+
+## Authentication
+
+<table  class="table desc-table">
+  <tr>
+      <td rowspan="15"><code>org.camunda.bpm.rpa.uipath-api.authentication</code></td>
+      <td><code>auth-url</code></td>
+      <td>The URL used for authentication against the UIPath API.</td>
+      <td>https://account.uipath.com/oauth/token/</td>
+  </tr>
   <tr>
       <td><code>client-id</code></td>
       <td>The client ID as issued by UIPath. This is only used for authentication.</td>
@@ -114,11 +122,22 @@ The bridge is configurable through the `application.yml` file that is included i
   <tr>
       <td><code>refresh-token</code></td>
       <td>An API access token issued by UIPath. This is used to refresh the authentication token when it expires.</td>
-      <td></td>
+      <td>-</td>
+  </tr>
+</table>
+
+## Webhook
+
+<table class="table desc-table">
+  <tr>
+    <td rowspan="15"><code>org.camunda.bpm.rpa.uipath-api.webhook</code></td>
+      <td><code>secret</code></td>
+      <td>secret used in your UiPath webhook configuration</td>
+      <td>-</td>
   </tr>
   <tr>
-      <td><code>polling-rate-ms</code></td>
-      <td>Defines how often the bridge will poll for RPA bot status updates.</td>
-      <td>4000</td>
+    <td>path</td>
+    <td>Relative path of the webhook endpoint in your application.</td>
+    <td>/webhook/event</td>
   </tr>
 </table>
