@@ -18,7 +18,7 @@ For detailed instructions on how to connect your first RPA bot to a BPMN model (
   Please note that the RPA bridge is only available as enterprise edition.
 {{< /enterprise >}}
 
-# The Concepts
+# The Basics
 
 The Camunda RPA bridge serves a connector between Camunda (BPMN) on the one side and UIPath (RPA) on the other side. Processes running inside the Camunda engine can define external tasks that are marked as RPA tasks.
 
@@ -31,7 +31,7 @@ The Camunda RPA Bridge supports the on-premise version of the [UIPath Orchestrat
 * Camunda BPM 7.14 Enterprise Edition or later
 * Java 8 or later installed on the machine that runs the Camunda RPA bridge
 
-To design a BPMN model that connects to one or more RPA bots through the bridge, the following tools are very helpful:
+To design a BPMN model that connects to one or more RPA bots through the bridge, the following tools are very helpful (but not required):
 
 * Cawemo 1.4 or later (to create and distribute worker catalogs)
 * Camunda Modeler 4.2 or later (to apply the worker catalog to your process model)
@@ -141,3 +141,57 @@ The bridge is configurable through the `application.yml` file that is included i
     <td>/webhook/event</td>
   </tr>
 </table>
+
+# Set up an RPA Task
+
+The RPA bridge is a regular Java external task client and RPA tasks are [external tasks]({{< ref "/user-guide/process-engine/external-tasks.md" >}}) with specific settings.
+
+By default the bridge listens for tasks with the topics `uipath` and `RPA`. If a process instance reaches an external task with one of these topics, the bridge will be able to fetch and lock them. Once a task is locked the bridge will try to forward it to your installation of UIPath which will take care of executing the associated robots.
+
+## Map a Task to an RPA Bot
+
+To tell the bridge for which RPA process a bot should be started, it is necessary to add a [custom extension]({{< ref "/user-guide/model-api/bpmn-model-api/extension-elements.md" >}}) with the name `bot` and a value equal to a released process in UIPath.
+
+### Using Cawemo and the Camunda Modeler
+
+With Cawemo you can create worker catalogs that define all properties for RPA tasks. Those can be used to populate existing BPMN models with the correct properties and extensions using the Camunda Modeler.
+
+### Manual Setup using the Camunda Modeler
+
+The extension property can be set using the Camunda Modeler (or any other BPMN or XML editor). In the Modeler, select the task and switch to the Extensions tab in the properties panel. Add a property named `bot` with the value equal to the name of the process you want to start in UIPath.
+
+This example shows an external task that will trigger the UIPath process `Launch the Robots` and is published in the `RPA` external task topic.
+
+```xml
+<bpmn:serviceTask id="myRPAtask" name="Launch the Robots" camunda:type="external" camunda:topic="RPA">
+  <bpmn:extensionElements>
+    <camunda:properties>
+      <camunda:property name="bot" value="UIPathProcessName" />
+    </camunda:properties>
+  </bpmn:extensionElements>
+</bpmn:serviceTask>
+```
+## Variables
+
+You can send/receive variables to/from an RPA bot by using [input and output mapping]({{< ref "/user-guide/process-engine/variables.md#input-output-variable-mapping" >}}) on the external task.
+All local variables of the external task will be made available to the RPA bot. In return, all variables that the RPA bot exports will be returned back to the task and should be mapped to a higher scope via output mapping if the rest of the process should have access to them.
+Make sure to define input variables in your RPA bot to access them.
+
+This example shows an external task that uses input mapping to pass three variables to an RPA bot that runs the `PrintReceiptProcess`. If the bot returns a variable called `pdfStorage` it will be mapped to the tasks parent scope using output mapping.
+The bot might return more variables which will be ignored in this case.
+
+```xml
+<bpmn:serviceTask id="myRPAtask" name="GenerateReceipt" camunda:type="external" camunda:topic="RPA">
+  <bpmn:extensionElements>
+    <camunda:inputOutput>
+       <camunda:inputParameter name="productName">${product}</camunda:inputParameter>
+       <camunda:inputParameter name="count">${count}</camunda:inputParameter>
+       <camunda:inputParameter name="price">${price}</camunda:inputParameter>
+       <camunda:outputParameter name="pdfStorage">${pdfStorage}</camunda:outputParameter>
+      </camunda:inputOutput>
+    <camunda:properties>
+      <camunda:property name="bot" value="PrintReceipt" />
+    </camunda:properties>
+  </bpmn:extensionElements>
+</bpmn:serviceTask>
+```
